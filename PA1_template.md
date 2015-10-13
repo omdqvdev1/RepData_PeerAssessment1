@@ -5,51 +5,64 @@ output:
     keep_md: true
 ---
 ## Loading and preprocessing the data
-```{r dataload, echo=TRUE}
 
+```r
 ds <- read.csv("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
 Calculate total number of steps taken per day
 
-```{r totalsteps}
+
+```r
 ds_steps <- aggregate(steps ~ date, data = ds, FUN = sum, na.action = na.pass)
 with (ds_steps, 
       barplot(height = steps, width = 1, names = labels(date), 
               ylab = "Total steps", xlab = "Day",main = "Total daily steps"
               )
       )
+```
+
+![plot of chunk totalsteps](figure/totalsteps-1.png) 
+
+```r
 meansteps <- mean(ds_steps$steps, na.rm = TRUE)
 mediansteps <- median(ds_steps$steps, na.rm = TRUE)
 sdsteps <- sd(ds_steps$steps, na.rm = TRUE)
 ```
 
-Mean total number of steps per day is `r format(meansteps, digits=2, justify="right")`
+Mean total number of steps per day is 10766
 
-Median total number of steps per day is `r format(mediansteps, digits=2, justify="right")`
+Median total number of steps per day is 10765
 
-Std. deviation of the total number of steps per day is `r format(sdsteps, digits=2, justify="right")`
+Std. deviation of the total number of steps per day is 4269
 
 ## What is the average daily activity pattern?
-```{r dailyactivity}
+
+```r
 ds_avg_steps <- aggregate(steps ~ interval, data = ds, FUN = mean)
 with (ds_avg_steps, 
       plot(x = interval/100, y = steps, type = "l", 
            ylab = "Avg. steps", xlab = "interval(hour)", main="Average daily activity pattern"
            )
       )
+```
+
+![plot of chunk dailyactivity](figure/dailyactivity-1.png) 
+
+```r
 maxavgint <- ds_avg_steps$interval[which.max(ds_avg_steps$steps)]
 maxavgintstr <- paste0(trunc(maxavgint/100), "h ", maxavgint - trunc(maxavgint/100)*100, "min")
 ```
-5-minutes interval containing maximum number of steps in average begins at `r maxavgintstr` 
+5-minutes interval containing maximum number of steps in average begins at 8h 35min 
 
 ## Imputing missing values
 
-Total number of rows with NA is `r sum(!complete.cases(ds))`
+Total number of rows with NA is 2304
 
 Approximate NA values with mean values for the corresponding intervals
-```{r missingvalues}
+
+```r
 #calculate mean values per interval
 ds_mean_int <- aggregate(steps ~ interval, data = ds, FUN = mean)
 #find rows with NAs
@@ -65,22 +78,27 @@ with (ds_steps,
               main="Total daily steps after approximation of missed values"
               )
       )
+```
 
+![plot of chunk missingvalues](figure/missingvalues-1.png) 
+
+```r
 meansteps <- mean(ds_steps$steps)
 mediansteps <- median(ds_steps$steps)
 sdsteps <- sd(ds_steps$steps, na.rm = TRUE)
 ```
 
-Mean total number of steps per day is `r format(meansteps, digits=2, justify="right")`
+Mean total number of steps per day is 10766
 
-Median total number of steps per day is `r format(mediansteps, digits=2, justify="right")`
+Median total number of steps per day is 10766
 
-Std. deviation of the total number of steps per day is `r format(sdsteps, digits=2, justify="right")`
+Std. deviation of the total number of steps per day is 3974
 
 Compared to the original dataset, the mean and median values remained practically the same, whereas standard deviation changed, i.e. decreased, which shows that the modified dataset is less spread around its center.
 
 
-```{r weekdays, fig.height = 6}
+
+```r
 library(ggplot2)
 #create factor for week days (0-Sunday, 1-Monday,..., 6-Saturday)
 wds <- factor(c("weekend","weekday","weekday","weekday","weekday","weekday","weekend"),
@@ -97,3 +115,5 @@ qplot(y = steps, x = interval/100, data = ds_wd_steps,
       main = "Average number of steps per interval in weekdays and weekends"
       ) + facet_wrap(~ wd, nrow = 2) + geom_path(colour = 'blue', size = 0) 
 ```
+
+![plot of chunk weekdays](figure/weekdays-1.png) 
